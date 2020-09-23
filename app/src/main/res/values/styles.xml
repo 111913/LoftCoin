@@ -2,6 +2,7 @@
 
     <attr name="buttonWelcome" format="reference" />
     <attr name="walletCardBackground" format="color|reference" />
+    <attr name="walletCardBackgroundOutFocus" format="color|reference"/>
     <attr name="walletCardWidth" format="dimension|reference" />
     <attr name="walletCardHeight" format="dimension|reference" />
 
@@ -20,8 +21,14 @@
         <item name="textAppearanceHeadline3">@style/TextAppearance.AppTheme.H3</item>
         <item name="textAppearanceHeadline4">@style/TextAppearance.AppTheme.H4</item>
 
+        <item name="actionBarTheme">@style/AppTheme.AppBarOverlay</item>
+        <item name="actionBarPopupTheme">@style/AppTheme.PopupOverlay</item>
+
+        <item name="bottomNavigationStyle">@style/AppTheme.BottomNavigationView</item>
+
         <item name="buttonWelcome">@style/Widget.AppTheme.Button.Welcome</item>
         <item name="walletCardBackground">@color/dark_five</item>
+        <item name="walletCardBackgroundOutFocus">@color/dark_five_alpha</item>
         <item name="walletCardWidth">240dp</item>
         <item name="walletCardHeight">160dp</item>
     </style>
@@ -34,6 +41,18 @@
         <item name="android:paddingEnd">56dp</item>
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar">
+        <item name="android:background">?attr/colorPrimary</item>
+    </style>
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Light"/>
+
+    <style name="AppTheme.BottomNavigationView" parent="Widget.MaterialComponents.BottomNavigationView">
+        <item name="android:background">?attr/colorPrimaryVariant</item>
+        <item name="itemIconTint">@color/bottom_nav_item</item>
+        <item name="itemTextColor">@color/bottom_nav_item</item>
     </style>
 
     <style name="TextAppearance.AppTheme" parent="TextAppearance.MaterialComponents.Body1"/>

@@ -1,66 +1,84 @@
 package com.scorp.loftcoin.ui.wallets;
 
+import android.content.Context;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.PagerSnapHelper;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SnapHelper;
 
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.scorp.loftcoin.R;
+import com.scorp.loftcoin.databinding.FragmentWalletsBinding;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link WalletsFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+
 public class WalletsFragment extends Fragment {
+    private SnapHelper walletsSnapHelper;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    public WalletsFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment WalletsFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static WalletsFragment newInstance(String param1, String param2) {
-        WalletsFragment fragment = new WalletsFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
+    @Nullable
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_wallets, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        final FragmentWalletsBinding binding = FragmentWalletsBinding.bind(view);
+        walletsSnapHelper = new PagerSnapHelper();
+        walletsSnapHelper.attachToRecyclerView(binding.recycler);
+
+        final TypedValue value = new TypedValue();
+        view.getContext().getTheme().resolveAttribute(R.attr.walletCardWidth, value, true);
+        final DisplayMetrics displayMetrics = view.getContext().getResources().getDisplayMetrics();
+        final int padding = (int) (displayMetrics.widthPixels - value.getDimension(displayMetrics)) / 2;
+        binding.recycler.setPadding(padding, 0, padding, 0);
+        binding.recycler.setClipToPadding(false);
+
+        binding.recycler.addOnScrollListener(new CarouselScroller());
+
+        binding.recycler.setLayoutManager(new LinearLayoutManager(view.getContext(), RecyclerView.HORIZONTAL, false));
+        binding.recycler.setAdapter(new WalletsAdapter());
+        binding.recycler.setVisibility(View.VISIBLE);
+        binding.walletCard.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onDestroyView() {
+        walletsSnapHelper.attachToRecyclerView(null);
+        super.onDestroyView();
+    }
+
+    private static class CarouselScroller extends RecyclerView.OnScrollListener {
+        @Override
+        public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+            final int centerX = (recyclerView.getLeft() + recyclerView.getRight()) / 2;
+            for (int i = 0; i < recyclerView.getChildCount(); ++i) {
+                final View child = recyclerView.getChildAt(i);
+                final int childCenterX = (child.getLeft() + child.getRight()) / 2;
+                final float childOffset = Math.abs(centerX - childCenterX) / (float) centerX; // 1.2, 0, 1.2
+                float factor = (float) (Math.pow(0.9, childOffset)); // 2^1/1.2, 2^0, 2^// 0.4, 1, 0.4
+
+                if(childCenterX == centerX){
+                    child.setBackground(ContextCompat.getDrawable(child.getContext(),R.drawable.bg_wallet_card));
+                }
+                else {
+                    child.setBackground(ContextCompat.getDrawable(child.getContext(),R.drawable.bg_wallet_card_out_focus));
+                }
+
+                child.setScaleX(factor);
+                child.setScaleY(factor);
+            }
+        }
     }
 }

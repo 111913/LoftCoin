@@ -4,7 +4,7 @@
     android:layout_height="?attr/walletCardHeight"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="@drawable/bg_wallet_card">
+    android:background="@drawable/bg_wallet_card_out_focus">
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guidline_top"
@@ -43,6 +43,7 @@
         tools:src="@tools:sample/avatars"/>
     
     <TextView
+        android:id="@+id/coin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
