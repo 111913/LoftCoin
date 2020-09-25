@@ -13,11 +13,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.scorp.loftcoin.R;
 import com.scorp.loftcoin.data.Coin;
 import com.scorp.loftcoin.databinding.FragmentRatesBinding;
+import com.scorp.loftcoin.util.PercentFormatter;
+import com.scorp.loftcoin.util.PriceFormatter;
 
 import java.util.List;
 
@@ -34,7 +37,7 @@ public class RatesFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         viewModel = new ViewModelProvider(this).get(RatesViewModel.class);
-        adapter = new RatesAdapter();
+        adapter = new RatesAdapter(new PriceFormatter(), new PercentFormatter());
     }
 
     @Nullable
@@ -53,6 +56,7 @@ public class RatesFragment extends Fragment {
         binding.recyclerRates.setHasFixedSize(true);
 
         viewModel.coins().observe(getViewLifecycleOwner(), (coins) -> adapter.submitList(coins));
+        viewModel.isRefreshing().observe(getViewLifecycleOwner(), (refreshing) -> binding.refresher.setRefreshing(refreshing));
     }
 
     @Override
@@ -63,8 +67,11 @@ public class RatesFragment extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        Timber.d("%s", item);
-        //Log.d("%s", item.toString());
+        if(R.id.currency_dialog == item.getItemId()){
+            NavHostFragment.findNavController(this)
+                .navigate(R.id.currency_dialog);
+            return true;
+        }
         return super.onOptionsItemSelected(item);
     }
 

@@ -3,6 +3,8 @@ package com.scorp.loftcoin;
 import android.app.Application;
 import android.os.StrictMode;
 
+import com.scorp.loftcoin.util.DebugTree;
+
 import timber.log.Timber;
 
 public class LoftApp extends Application {
@@ -13,7 +15,7 @@ public class LoftApp extends Application {
 
         if(BuildConfig.DEBUG){
             StrictMode.enableDefaults();
-            Timber.plant(new Timber.DebugTree());
+            Timber.plant(new DebugTree());
         }
     }
 }
