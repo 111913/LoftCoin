@@ -1,7 +1,11 @@
 package com.scorp.loftcoin.ui.rates;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -16,6 +20,8 @@ import com.scorp.loftcoin.data.Coin;
 import com.scorp.loftcoin.databinding.FragmentRatesBinding;
 
 import java.util.List;
+
+import timber.log.Timber;
 
 public class RatesFragment extends Fragment {
 
@@ -40,12 +46,26 @@ public class RatesFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        setHasOptionsMenu(true);
         binding = FragmentRatesBinding.bind(view);
         binding.recyclerRates.setLayoutManager(new LinearLayoutManager(view.getContext()));
         binding.recyclerRates.swapAdapter(adapter, false);
         binding.recyclerRates.setHasFixedSize(true);
 
         viewModel.coins().observe(getViewLifecycleOwner(), (coins) -> adapter.submitList(coins));
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        inflater.inflate(R.menu.rates_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        Timber.d("%s", item);
+        //Log.d("%s", item.toString());
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
