@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.scorp.loftcoin.R;
@@ -16,16 +17,18 @@ import com.scorp.loftcoin.databinding.FragmentRatesBinding;
 
 import java.util.List;
 
-public class RatesFragment extends Fragment implements RatesView {
+public class RatesFragment extends Fragment {
 
     private FragmentRatesBinding binding;
 
-    private RatesPresenter presenter;
+    private RatesAdapter adapter;
+    private RatesViewModel viewModel;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        presenter = new RatesPresenter();
+        viewModel = new ViewModelProvider(this).get(RatesViewModel.class);
+        adapter = new RatesAdapter();
     }
 
     @Nullable
@@ -38,24 +41,16 @@ public class RatesFragment extends Fragment implements RatesView {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         binding = FragmentRatesBinding.bind(view);
-        binding.recyclerRates.setLayoutManager(new LinearLayoutManager((view.getContext())));
+        binding.recyclerRates.setLayoutManager(new LinearLayoutManager(view.getContext()));
+        binding.recyclerRates.swapAdapter(adapter, false);
         binding.recyclerRates.setHasFixedSize(true);
-        presenter.attach(this);
+
+        viewModel.coins().observe(getViewLifecycleOwner(), (coins) -> adapter.submitList(coins));
     }
 
     @Override
     public void onDestroyView() {
-        presenter.detach(this);
+        binding.recyclerRates.swapAdapter(null, false);
         super.onDestroyView();
-    }
-
-    @Override
-    public void showCoins(@NonNull List<? extends Coin> coins) {
-        binding.recyclerRates.setAdapter(new RatesAdapter(coins));
-    }
-
-    @Override
-    public void showError(@NonNull String error) {
-
     }
 }
