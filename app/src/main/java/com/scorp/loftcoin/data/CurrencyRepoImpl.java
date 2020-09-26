@@ -15,7 +15,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class CurrencyRepoImpl implements CurrencyRepo {
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+@Singleton
+class CurrencyRepoImpl implements CurrencyRepo {
 
     private static final String KEY_CURRENCY = "currency";
 
@@ -23,6 +27,7 @@ public class CurrencyRepoImpl implements CurrencyRepo {
 
     private SharedPreferences prefs;
 
+    @Inject
     public CurrencyRepoImpl(@NonNull Context context) {
         this.prefs = PreferenceManager.getDefaultSharedPreferences(context);
         availableCurrencies.put("USD", Currency.create("$", "USD", context.getString(R.string.usd)));

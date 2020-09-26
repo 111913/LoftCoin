@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.scorp.loftcoin.BaseComponent;
 import com.scorp.loftcoin.R;
 import com.scorp.loftcoin.data.Coin;
 import com.scorp.loftcoin.databinding.FragmentRatesBinding;
@@ -24,19 +25,30 @@ import com.scorp.loftcoin.util.PriceFormatter;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import timber.log.Timber;
 
 public class RatesFragment extends Fragment {
+
+    private final RatesComponent ratesComponent;
 
     private FragmentRatesBinding binding;
 
     private RatesAdapter adapter;
     private RatesViewModel viewModel;
 
+    @Inject
+    public RatesFragment(BaseComponent baseComponent) {
+        ratesComponent = DaggerRatesComponent.builder()
+                .baseComponent(baseComponent)
+                .build();
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        viewModel = new ViewModelProvider(this).get(RatesViewModel.class);
+        viewModel = new ViewModelProvider(this, ratesComponent.viewModelFactory()).get(RatesViewModel.class);
         adapter = new RatesAdapter(new PriceFormatter(), new PercentFormatter());
     }
 
