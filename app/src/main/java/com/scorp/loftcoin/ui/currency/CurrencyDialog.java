@@ -7,18 +7,22 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.scorp.loftcoin.R;
+import com.scorp.loftcoin.data.Currency;
 import com.scorp.loftcoin.data.CurrencyRepo;
 import com.scorp.loftcoin.data.CurrencyRepoImpl;
 import com.scorp.loftcoin.databinding.DialogCurrencyBinding;
+import com.scorp.loftcoin.util.OnItemClick;
 
 public class CurrencyDialog extends AppCompatDialogFragment {
 
     private DialogCurrencyBinding binding;
     private CurrencyRepo currencyRepo;
     private CurrencyAdapter adapter;
+    private OnItemClick onItemClick;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -43,10 +47,20 @@ public class CurrencyDialog extends AppCompatDialogFragment {
         binding.recycler.setLayoutManager(new LinearLayoutManager(requireActivity()));
         binding.recycler.setAdapter(adapter);
         currencyRepo.availableCurrencies().observe(this, adapter::submitList);
+        onItemClick = new OnItemClick(binding.recycler.getContext(), (v) -> {
+            final RecyclerView.ViewHolder viewHolder = binding.recycler.findContainingViewHolder(v);
+            if (viewHolder != null) {
+                final Currency item = adapter.getItem(viewHolder.getAdapterPosition());
+                currencyRepo.updateCurrency(item);
+            }
+            dismissAllowingStateLoss();
+        });
+        binding.recycler.addOnItemTouchListener(onItemClick);
     }
 
     @Override
     public void onDestroy() {
+        binding.recycler.removeOnItemTouchListener(onItemClick);
         binding.recycler.setAdapter(null);
         super.onDestroy();
     }
