@@ -69,6 +69,8 @@ public class RatesFragment extends Fragment {
 
         viewModel.coins().observe(getViewLifecycleOwner(), (coins) -> adapter.submitList(coins));
         viewModel.isRefreshing().observe(getViewLifecycleOwner(), (refreshing) -> binding.refresher.setRefreshing(refreshing));
+
+        binding.refresher.setOnRefreshListener(() -> viewModel.isRefreshing().observe(getViewLifecycleOwner(), (refreshing) -> binding.refresher.setRefreshing(refreshing)));
     }
 
     @Override
