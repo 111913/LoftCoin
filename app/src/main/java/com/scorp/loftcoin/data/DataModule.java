@@ -40,7 +40,7 @@ public abstract class DataModule {
     static Moshi moshi() {
         final Moshi moshi = new Moshi.Builder().build();
         return moshi.newBuilder()
-                .add(Coin.class, moshi.adapter(AutoValue_Coin.class))
+                .add(Coin.class, moshi.adapter(AutoValue_CmcCoin.class))
                 .add(Listings.class, moshi.adapter(AutoValue_Listings.class))
                 .build();
     }
