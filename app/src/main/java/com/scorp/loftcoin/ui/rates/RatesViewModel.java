@@ -1,7 +1,5 @@
 package com.scorp.loftcoin.ui.rates;
 
-import android.transition.TransitionInflater;
-
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -13,12 +11,9 @@ import com.scorp.loftcoin.data.CoinsRepo;
 import com.scorp.loftcoin.data.CurrencyRepo;
 import com.scorp.loftcoin.data.SortBy;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
@@ -26,7 +21,6 @@ import javax.inject.Inject;
 public class RatesViewModel extends ViewModel {
 
     private final MutableLiveData<Boolean> isRefreshing = new MutableLiveData<>();
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final MutableLiveData<AtomicBoolean> forceRefresh = new MutableLiveData<>(new AtomicBoolean(true));
     private final MutableLiveData<SortBy> sortBy = new MutableLiveData<>(SortBy.RANK);
     private final LiveData<List<Coin>> coins;
@@ -39,6 +33,8 @@ public class RatesViewModel extends ViewModel {
     public RatesViewModel(CoinsRepo coinsRepo, CurrencyRepo currencyRepo){
         //   t           t(f)         t(f)      t(f)     t(f)        t
         //(f|t) -> forceRefresh -> currency -> sortBy -> query -> listings
+        // USD -> RUB -> USD -> USD -> USD -> EUR -> EUR
+        // Transformations.distinctUntilChanged()
         final LiveData<CoinsRepo.Query> query = Transformations.switchMap(forceRefresh, (r) -> {
             //r == true || false
             return Transformations.switchMap(currencyRepo.currency(), (c) -> {

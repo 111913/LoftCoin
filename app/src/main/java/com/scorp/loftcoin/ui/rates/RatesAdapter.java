@@ -104,7 +104,6 @@ public class RatesAdapter extends ListAdapter<Coin, RatesAdapter.ViewHolder> {
             holder.binding.price.setText(priceFormatter.format(coin.currencyCode(), coin.price()));
             holder.binding.change.setText(percentFormatter.format(coin.change24h()));
         }
-        super.onBindViewHolder(holder, position, payloads);
     }
 
     @Override

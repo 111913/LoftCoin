@@ -42,9 +42,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getSupportFragmentManager().setFragmentFactory(fragmentFactory);
+
         final ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
         setSupportActionBar(binding.toolbar);
         setContentView(binding.getRoot());
+
         final NavController navController = Navigation.findNavController(this, R.id.main_host);
         NavigationUI.setupWithNavController(binding.bottomNav, navController);
         NavigationUI.setupWithNavController(binding.toolbar, navController, new AppBarConfiguration

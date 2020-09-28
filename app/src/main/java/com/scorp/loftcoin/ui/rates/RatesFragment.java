@@ -1,7 +1,6 @@
 package com.scorp.loftcoin.ui.rates;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -18,16 +17,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.scorp.loftcoin.BaseComponent;
 import com.scorp.loftcoin.R;
-import com.scorp.loftcoin.data.Coin;
 import com.scorp.loftcoin.databinding.FragmentRatesBinding;
-import com.scorp.loftcoin.util.PercentFormatter;
-import com.scorp.loftcoin.util.PriceFormatter;
-
-import java.util.List;
 
 import javax.inject.Inject;
-
-import timber.log.Timber;
 
 public class RatesFragment extends Fragment {
 
@@ -49,7 +41,7 @@ public class RatesFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         viewModel = new ViewModelProvider(this, ratesComponent.viewModelFactory()).get(RatesViewModel.class);
-        //adapter = new RatesAdapter(new PriceFormatter(), new PercentFormatter());
+
         adapter = ratesComponent.ratesAdapter();
     }
 
@@ -63,9 +55,10 @@ public class RatesFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setHasOptionsMenu(true);
+
         binding = FragmentRatesBinding.bind(view);
         binding.recyclerRates.setLayoutManager(new LinearLayoutManager(view.getContext()));
-        binding.recyclerRates.swapAdapter(adapter, false);
+        binding.recyclerRates.setAdapter(adapter);
         binding.recyclerRates.setHasFixedSize(true);
 
         viewModel.coins().observe(getViewLifecycleOwner(), (coins) -> adapter.submitList(coins));
@@ -96,7 +89,7 @@ public class RatesFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
-        binding.recyclerRates.swapAdapter(null, false);
+        binding.recyclerRates.setAdapter(null);
         super.onDestroyView();
     }
 }

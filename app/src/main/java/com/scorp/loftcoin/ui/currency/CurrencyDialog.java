@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.scorp.loftcoin.BaseComponent;
 import com.scorp.loftcoin.R;
-import com.scorp.loftcoin.data.Currency;
 import com.scorp.loftcoin.databinding.DialogCurrencyBinding;
 import com.scorp.loftcoin.util.OnItemClick;
 
@@ -59,7 +58,7 @@ public class CurrencyDialog extends AppCompatDialogFragment {
         binding.recycler.setLayoutManager(new LinearLayoutManager(requireActivity()));
         binding.recycler.setAdapter(adapter);
         viewModel.allCurrencies().observe(this, adapter::submitList);
-        onItemClick = new OnItemClick(binding.recycler.getContext(), (v) -> {
+        onItemClick = new OnItemClick((v) -> {
             final RecyclerView.ViewHolder viewHolder = binding.recycler.findContainingViewHolder(v);
             if (viewHolder != null) {
                 viewModel.updateCurrency(adapter.getItem(viewHolder.getAdapterPosition()));

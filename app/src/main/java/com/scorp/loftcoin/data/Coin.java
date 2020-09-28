@@ -8,11 +8,11 @@ public interface Coin {
 
     String symbol();
 
+    int rank();
+
     double price();
 
     double change24h();
-
-    int rank();
 
     String currencyCode();
 

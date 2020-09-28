@@ -27,7 +27,7 @@ public class WalletsAdapter extends RecyclerView.Adapter<WalletsAdapter.ViewHold
 
     @Override
     public int getItemCount() {
-        return 10;
+        return 0;
     }
 
     @Override
@@ -39,6 +39,7 @@ public class WalletsAdapter extends RecyclerView.Adapter<WalletsAdapter.ViewHold
     static class ViewHolder extends RecyclerView.ViewHolder {
         public ViewHolder(@NonNull LiWalletBinding binding) {
             super(binding.getRoot());
+            binding.getRoot().setClipToOutline(true);
         }
     }
 }
