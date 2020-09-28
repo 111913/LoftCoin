@@ -21,7 +21,11 @@ import com.scorp.loftcoin.databinding.FragmentRatesBinding;
 
 import javax.inject.Inject;
 
+import io.reactivex.disposables.CompositeDisposable;
+
 public class RatesFragment extends Fragment {
+
+    private final CompositeDisposable disposable = new CompositeDisposable();
 
     private final RatesComponent ratesComponent;
 
@@ -60,11 +64,10 @@ public class RatesFragment extends Fragment {
         binding.recyclerRates.setLayoutManager(new LinearLayoutManager(view.getContext()));
         binding.recyclerRates.setAdapter(adapter);
         binding.recyclerRates.setHasFixedSize(true);
-
-        viewModel.coins().observe(getViewLifecycleOwner(), (coins) -> adapter.submitList(coins));
-        viewModel.isRefreshing().observe(getViewLifecycleOwner(), (refreshing) -> binding.refresher.setRefreshing(refreshing));
-
         binding.refresher.setOnRefreshListener(viewModel::refresh);
+
+        disposable.add(viewModel.coins().subscribe((coins) -> adapter.submitList(coins)));
+        disposable.add(viewModel.isRefreshing().subscribe((refreshing) -> binding.refresher.setRefreshing(refreshing)));
     }
 
     @Override
@@ -90,6 +93,7 @@ public class RatesFragment extends Fragment {
     @Override
     public void onDestroyView() {
         binding.recyclerRates.setAdapter(null);
+        disposable.clear();
         super.onDestroyView();
     }
 }
