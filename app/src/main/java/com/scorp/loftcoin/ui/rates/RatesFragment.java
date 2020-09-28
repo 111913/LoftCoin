@@ -49,7 +49,8 @@ public class RatesFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         viewModel = new ViewModelProvider(this, ratesComponent.viewModelFactory()).get(RatesViewModel.class);
-        adapter = new RatesAdapter(new PriceFormatter(), new PercentFormatter());
+        //adapter = new RatesAdapter(new PriceFormatter(), new PercentFormatter());
+        adapter = ratesComponent.ratesAdapter();
     }
 
     @Nullable
@@ -70,7 +71,7 @@ public class RatesFragment extends Fragment {
         viewModel.coins().observe(getViewLifecycleOwner(), (coins) -> adapter.submitList(coins));
         viewModel.isRefreshing().observe(getViewLifecycleOwner(), (refreshing) -> binding.refresher.setRefreshing(refreshing));
 
-        binding.refresher.setOnRefreshListener(() -> viewModel.isRefreshing().observe(getViewLifecycleOwner(), (refreshing) -> binding.refresher.setRefreshing(refreshing)));
+        binding.refresher.setOnRefreshListener(viewModel::refresh);
     }
 
     @Override
@@ -84,6 +85,10 @@ public class RatesFragment extends Fragment {
         if(R.id.currency_dialog == item.getItemId()){
             NavHostFragment.findNavController(this)
                 .navigate(R.id.currency_dialog);
+            return true;
+        }
+        else if(R.id.sort == item.getItemId()){
+            viewModel.switchSortingOrder();
             return true;
         }
         return super.onOptionsItemSelected(item);
