@@ -2,15 +2,11 @@ package com.scorp.loftcoin.ui.rates;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.Outline;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewOutlineProvider;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,16 +15,12 @@ import com.scorp.loftcoin.BuildConfig;
 import com.scorp.loftcoin.R;
 import com.scorp.loftcoin.data.Coin;
 import com.scorp.loftcoin.databinding.LiRateBinding;
-import com.scorp.loftcoin.util.Formatter;
 import com.scorp.loftcoin.util.ImageLoader;
-import com.scorp.loftcoin.util.OutlineCircle;
+import com.scorp.loftcoin.widget.OutlineCircle;
 import com.scorp.loftcoin.util.PercentFormatter;
 import com.scorp.loftcoin.util.PriceFormatter;
-import com.squareup.picasso.Picasso;
 
-import java.text.NumberFormat;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 
 import javax.inject.Inject;
@@ -66,6 +58,11 @@ public class RatesAdapter extends ListAdapter<Coin, RatesAdapter.ViewHolder> {
         this.percentFormatter = percentFormatter;
         this.imageLoader = imageLoader;
         setHasStableIds(true);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return getItem(position).id();
     }
 
     @NonNull

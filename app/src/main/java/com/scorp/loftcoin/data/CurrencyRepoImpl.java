@@ -19,8 +19,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
-import io.reactivex.ObservableOnSubscribe;
 
 @Singleton
 class CurrencyRepoImpl implements CurrencyRepo {

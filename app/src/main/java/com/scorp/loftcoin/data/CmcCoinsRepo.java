@@ -2,7 +2,10 @@ package com.scorp.loftcoin.data;
 
 import androidx.annotation.NonNull;
 
+import com.scorp.loftcoin.util.RxSchedulers;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -10,6 +13,7 @@ import javax.inject.Singleton;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
+import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 
 @Singleton
@@ -17,13 +21,16 @@ class CmcCoinsRepo implements CoinsRepo {
 
     private final CmcApi api;
     private final LoftDatabase db;
+    private final RxSchedulers schedulers;
 
     @Inject
-    public CmcCoinsRepo(CmcApi api, LoftDatabase db){
+    public CmcCoinsRepo(CmcApi api, LoftDatabase db, RxSchedulers schedulers){
         this.api = api;
         this.db = db;
+        this.schedulers = schedulers;
     }
 
+    @NonNull
     @Override
     public Observable<List<Coin>> listings(@NonNull Query query) {
 
@@ -34,10 +41,22 @@ class CmcCoinsRepo implements CoinsRepo {
                 .doOnNext((coins) -> db.coins().insert(coins))
                 .switchMap((coins) -> fetchFromDb(query))
                 .switchIfEmpty(fetchFromDb(query))
-                .<List<Coin>>map(ArrayList::new)
-                .subscribeOn(Schedulers.io())
+                .<List<Coin>>map(Collections::unmodifiableList)
+                .subscribeOn(schedulers.io())
         ;
 
+    }
+
+    @NonNull
+    @Override
+    public Single<Coin> coin(@NonNull Currency currency, long id){
+        return listings(Query.builder()
+                        .currency(currency.code())
+                        .forceUpdate(false)
+                        .build()
+        ).switchMapSingle((coins) -> db.coins().fetchOne(id))
+                .firstOrError()
+                .map((coin) -> coin);
     }
 
     private ObservableSource<List<RoomCoin>> fetchFromDb(Query query) {

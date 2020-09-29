@@ -10,6 +10,7 @@ import com.scorp.loftcoin.data.Coin;
 import com.scorp.loftcoin.data.CoinsRepo;
 import com.scorp.loftcoin.data.CurrencyRepo;
 import com.scorp.loftcoin.data.SortBy;
+import com.scorp.loftcoin.util.RxSchedulers;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -30,13 +31,15 @@ public class RatesViewModel extends ViewModel {
     private final Subject<SortBy> sortBy = BehaviorSubject.createDefault(SortBy.RANK);
     private final AtomicBoolean forceUpdate = new AtomicBoolean(true);
     private final Observable<List<Coin>> coins;
+    private final RxSchedulers schedulers;
 
     private int sortingIndex = 1;
 
     // AppComponent(BaseComponent) -> MainComponent -> Fragment(BaseComponent) -> RatesComponent -> RatesViewModel()
 
     @Inject
-    public RatesViewModel(CoinsRepo coinsRepo, CurrencyRepo currencyRepo){
+    public RatesViewModel(CoinsRepo coinsRepo, CurrencyRepo currencyRepo, RxSchedulers schedulers){
+        this.schedulers = schedulers;
         //   t           t(f)         t(f)      t(f)     t(f)        t
         //(f|t) -> forceRefresh -> currency -> sortBy -> query -> listings
         // USD -> RUB -> USD -> USD -> USD -> EUR -> EUR
@@ -48,22 +51,22 @@ public class RatesViewModel extends ViewModel {
                 .doOnNext((qb) -> forceUpdate.set(true))
                 .doOnNext((qb) -> isRefreshing.onNext(true))
                 .switchMap((qb) -> sortBy
-                        .map((s) -> qb.sortBy(s))
+                        .map(qb::sortBy)
                 )
                 .map((qb) -> qb.forceUpdate(forceUpdate.getAndSet(false)))
-                .map((qb) -> qb.build())
-                .switchMap((q) -> coinsRepo.listings(q))
+                .map(CoinsRepo.Query.Builder::build)
+                .switchMap(coinsRepo::listings)
                 .doOnEach((ntf) -> isRefreshing.onNext(false));
     }
 
     @NonNull
     Observable<List<Coin>> coins(){
-        return coins.observeOn(AndroidSchedulers.mainThread());
+        return coins.observeOn(schedulers.main());
     }
 
     @NonNull
     Observable<Boolean> isRefreshing() {
-        return isRefreshing.observeOn(AndroidSchedulers.mainThread());
+        return isRefreshing.observeOn(schedulers.main());
     }
 
     final void refresh() {

@@ -5,13 +5,39 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.scorp.loftcoin.data.Wallet;
 import com.scorp.loftcoin.databinding.LiWalletBinding;
+import com.scorp.loftcoin.util.PriceFormatter;
 
-public class WalletsAdapter extends RecyclerView.Adapter<WalletsAdapter.ViewHolder> {
+import java.util.Objects;
 
+import javax.inject.Inject;
+
+public class WalletsAdapter extends ListAdapter<Wallet, WalletsAdapter.ViewHolder> {
+
+    private final PriceFormatter priceFormatter;
     private LayoutInflater inflater;
+
+    @Inject
+    WalletsAdapter(PriceFormatter priceFormatter) {
+        super(new DiffUtil.ItemCallback<Wallet>(){
+
+            @Override
+            public boolean areItemsTheSame(@NonNull Wallet oldItem, @NonNull Wallet newItem) {
+                return Objects.equals(oldItem.uid(), newItem.uid());
+            }
+
+            @Override
+            public boolean areContentsTheSame(@NonNull Wallet oldItem, @NonNull Wallet newItem) {
+                return Objects.equals(oldItem, newItem);
+            }
+        });
+        this.priceFormatter = priceFormatter;
+    }
 
     @NonNull
     @Override
@@ -22,12 +48,9 @@ public class WalletsAdapter extends RecyclerView.Adapter<WalletsAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-
-    }
-
-    @Override
-    public int getItemCount() {
-        return 0;
+        final Wallet wallet = getItem(position);
+        holder.binding.coin.setText(wallet.coin().symbol());
+        holder.binding.balance1.setText(priceFormatter.format(wallet.balance()));
     }
 
     @Override
@@ -37,9 +60,13 @@ public class WalletsAdapter extends RecyclerView.Adapter<WalletsAdapter.ViewHold
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
+
+        private final LiWalletBinding binding;
+
         public ViewHolder(@NonNull LiWalletBinding binding) {
             super(binding.getRoot());
             binding.getRoot().setClipToOutline(true);
+            this.binding = binding;
         }
     }
 }
