@@ -23,4 +23,5 @@ public abstract class WalletsComponent {
 
     abstract WalletsAdapter walletsAdapter();
 
+    abstract TransactionsAdapter transactionsAdapter();
 }

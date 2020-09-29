@@ -13,10 +13,11 @@
         android:textAppearance="?attr/textAppearanceHeadline3"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/timesTrans"
+        app:layout_constraintEnd_toStartOf="@id/timestamp"
         tools:text="123 BTC"/>
 
     <TextView
+        android:id="@+id/amount2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -27,7 +28,7 @@
         tools:text="+ 1.23 $"/>
 
     <TextView
-        android:id="@+id/timesTrans"
+        android:id="@+id/timestamp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?attr/textAppearanceHeadline4"

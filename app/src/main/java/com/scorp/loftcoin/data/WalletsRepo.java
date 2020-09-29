@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 
 import java.util.List;
 
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 
 public interface WalletsRepo {
@@ -12,6 +13,9 @@ public interface WalletsRepo {
     Observable<List<Wallet>> wallets(@NonNull Currency currency);
 
     @NonNull
-    Observable<List<Transaction>> transaction(@NonNull Wallet wallet);
+    Observable<List<Transaction>> transactions(@NonNull Wallet wallet);
+
+    @NonNull
+    Completable addWallet(@NonNull Currency currency, List<Integer> takenIds);
 
 }

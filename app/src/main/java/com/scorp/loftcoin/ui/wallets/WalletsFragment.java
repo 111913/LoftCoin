@@ -1,6 +1,5 @@
 package com.scorp.loftcoin.ui.wallets;
 
-import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -16,11 +15,15 @@ import androidx.recyclerview.widget.SnapHelper;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.scorp.loftcoin.BaseComponent;
 import com.scorp.loftcoin.R;
+import com.scorp.loftcoin.data.Transaction;
 import com.scorp.loftcoin.databinding.FragmentWalletsBinding;
 
 import java.util.List;
@@ -28,6 +31,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.functions.Consumer;
 
 
 public class WalletsFragment extends Fragment {
@@ -42,7 +46,9 @@ public class WalletsFragment extends Fragment {
 
     private SnapHelper walletsSnapHelper;
 
-    private WalletsAdapter adapter;
+    private WalletsAdapter walletsAdapter;
+
+    private TransactionsAdapter transactionsAdapter;
 
     @Inject
     public WalletsFragment(BaseComponent baseComponent) {
@@ -56,7 +62,8 @@ public class WalletsFragment extends Fragment {
         super.onCreate(savedInstanceState);
         viewModel = new ViewModelProvider(this, component.viewModelFactory())
                 .get(WalletsViewModel.class);
-        adapter = component.walletsAdapter();
+        walletsAdapter = component.walletsAdapter();
+        transactionsAdapter = component.transactionsAdapter();
     }
 
     @Nullable
@@ -82,12 +89,23 @@ public class WalletsFragment extends Fragment {
         binding.recycler.addOnScrollListener(new CarouselScroller());
         binding.recycler.setLayoutManager(new LinearLayoutManager(view.getContext(), RecyclerView.HORIZONTAL, false));
 
-        binding.recycler.setAdapter(adapter);
+        binding.recycler.setAdapter(walletsAdapter);
 
-        disposable.add(viewModel.wallets().subscribe(list -> adapter.submitList(list)));
+        disposable.add(viewModel.wallets().subscribe(list -> walletsAdapter.submitList(list)));
         disposable.add(viewModel.wallets().map(wallets -> wallets.isEmpty()).subscribe((isEmpty) ->{
             binding.walletCard.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
             binding.recycler.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
+        }));
+
+        binding.transactions.setLayoutManager(new LinearLayoutManager(view.getContext()));
+        binding.transactions.setAdapter(transactionsAdapter);
+        binding.transactions.setHasFixedSize(true);
+
+        disposable.add(viewModel.transactions().subscribe(new Consumer<List<Transaction>>() {
+            @Override
+            public void accept(List<Transaction> list) throws Exception {
+                transactionsAdapter.submitList(list);
+            }
         }));
     }
 
@@ -95,9 +113,26 @@ public class WalletsFragment extends Fragment {
     public void onDestroyView() {
         walletsSnapHelper.attachToRecyclerView(null);
         binding.recycler.setAdapter(null);
+        binding.transactions.setAdapter(null);
         disposable.clear();
         super.onDestroyView();
     }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        inflater.inflate(R.menu.wallets, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (R.id.add == item.getItemId()) {
+            disposable.add(viewModel.addWallet().subscribe());
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
 
     private static class CarouselScroller extends RecyclerView.OnScrollListener {
         @Override

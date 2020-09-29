@@ -22,6 +22,7 @@ import javax.inject.Inject;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.subjects.BehaviorSubject;
+import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 
 public class RatesViewModel extends ViewModel {
@@ -32,6 +33,9 @@ public class RatesViewModel extends ViewModel {
     private final AtomicBoolean forceUpdate = new AtomicBoolean(true);
     private final Observable<List<Coin>> coins;
     private final RxSchedulers schedulers;
+
+    private final Subject<Throwable> error = PublishSubject.create();
+    private final Subject<Class<?>> onRetry = PublishSubject.create();
 
     private int sortingIndex = 1;
 
@@ -55,8 +59,14 @@ public class RatesViewModel extends ViewModel {
                 )
                 .map((qb) -> qb.forceUpdate(forceUpdate.getAndSet(false)))
                 .map(CoinsRepo.Query.Builder::build)
-                .switchMap(coinsRepo::listings)
-                .doOnEach((ntf) -> isRefreshing.onNext(false));
+                .switchMap((q) -> coinsRepo.listings(q)
+                        .doOnError(error::onNext)
+                        .retryWhen((e) -> onRetry)
+//                .onErrorReturnItem(Collections.emptyList()))
+                )
+                .doOnEach((ntf) -> isRefreshing.onNext(false))
+                .replay(1)
+                .autoConnect();
     }
 
     @NonNull
@@ -69,6 +79,11 @@ public class RatesViewModel extends ViewModel {
         return isRefreshing.observeOn(schedulers.main());
     }
 
+    @NonNull
+    Observable<Throwable> onError() {
+        return error.observeOn(schedulers.main());
+    }
+
     final void refresh() {
         pullToRefresh.onNext(Void.TYPE);
     }
@@ -77,4 +92,7 @@ public class RatesViewModel extends ViewModel {
         sortBy.onNext(SortBy.values()[sortingIndex++ % SortBy.values().length]);
     }
 
+    void retry() {
+        onRetry.onNext(Void.class);
+    }
 }

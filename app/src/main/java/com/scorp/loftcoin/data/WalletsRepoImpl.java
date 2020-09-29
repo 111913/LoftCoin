@@ -4,22 +4,30 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.security.SecureRandom;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 
 @Singleton
 class WalletsRepoImpl implements WalletsRepo {
 
+    private final Random random = new SecureRandom();
     private final FirebaseFirestore firestore;
     private final CoinsRepo coinsRepo;
 
@@ -35,23 +43,25 @@ class WalletsRepoImpl implements WalletsRepo {
 
         return Observable
                 .<QuerySnapshot>create(emitter -> {
-                    final ListenerRegistration registration = firestore.collection("wallets")
+                    final ListenerRegistration registration = firestore
+                            .collection("wallets")
+                            .orderBy("created_at", Query.Direction.ASCENDING)
                             .addSnapshotListener((snapshots, e) -> {
-                                if(emitter.isDisposed()) return;
-                                if(snapshots != null){
+                                if (emitter.isDisposed()) return;
+                                if (snapshots != null) {
                                     emitter.onNext(snapshots);
-                                }
-                                else if(e != null){
+                                } else if (e != null) {
                                     emitter.tryOnError(e);
                                 }
                             });
-                    emitter.setCancellable(() -> registration.remove());
+                    emitter.setCancellable(registration::remove);
                 })
-                .map(snapshots -> snapshots.getDocuments())
+                .map(QuerySnapshot::getDocuments)
                 .switchMapSingle((documents) -> Observable
                         .fromIterable(documents)
-                        .switchMapSingle((document) -> coinsRepo
-                                .coin(currency, Objects.requireNonNull(document.getLong("coinId"), "coinId"))
+                        .flatMapSingle((document) -> coinsRepo
+                                .coin(currency, Objects.requireNonNull(document
+                                        .getLong("coinId"), "coinId"))
                                 .map((coin) -> Wallet.create(
                                         document.getId(),
                                         coin,
@@ -64,7 +74,54 @@ class WalletsRepoImpl implements WalletsRepo {
 
     @NonNull
     @Override
-    public Observable<List<Transaction>> transaction(@NonNull Wallet wallet) {
-        return Observable.empty();
+    public Observable<List<Transaction>> transactions(@NonNull Wallet wallet) {
+        return Observable
+                .<QuerySnapshot>create(emitter -> {
+                    final ListenerRegistration registration = firestore
+                            .collection("wallets")
+                            .document(wallet.uid())
+                            .collection("transactions")
+                            .addSnapshotListener((snapshots, e) -> {
+                                if (emitter.isDisposed()) return;
+                                if (snapshots != null) {
+                                    emitter.onNext(snapshots);
+                                } else if (e != null) {
+                                    emitter.tryOnError(e);
+                                }
+                            });
+                    emitter.setCancellable(registration::remove);
+                })
+                .map(QuerySnapshot::getDocuments)
+                .switchMapSingle((documents) -> Observable
+                        .fromIterable(documents)
+                        .map((document) -> Transaction.create(
+                                document.getId(),
+                                wallet.coin(),
+                                Objects.requireNonNull(document.getDouble("amount"), "amount"),
+                                Objects.requireNonNull(document.getDate("created_at"), "created_at")
+                        ))
+                        .toList()
+                );
+    }
+
+
+    @NonNull
+    @Override
+    public Completable addWallet(@NonNull Currency currency, List<Integer> takenIds) {
+        return coinsRepo.nextPopularCoin(currency, takenIds)
+                .map((coin) -> {
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("balance", 100 * (random.nextDouble() + 0.01));
+                    data.put("coinId", coin.id());
+                    data.put("created_at", FieldValue.serverTimestamp());
+                    return data;
+                })
+                .flatMapCompletable((wallet) -> Completable.create((emitter) -> {
+                    firestore.collection("wallets").add(wallet)
+                            .addOnSuccessListener((r) -> {
+                                if (!emitter.isDisposed()) emitter.onComplete();
+                            })
+                            .addOnFailureListener(emitter::tryOnError);
+                }));
     }
 }
