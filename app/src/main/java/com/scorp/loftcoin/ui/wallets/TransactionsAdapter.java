@@ -12,6 +12,8 @@ import com.scorp.loftcoin.data.Transaction;
 import com.scorp.loftcoin.databinding.LiTransactionBinding;
 import com.scorp.loftcoin.util.PriceFormatter;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Objects;
 
 import javax.inject.Inject;
@@ -40,6 +42,7 @@ class TransactionsAdapter extends ListAdapter<Transaction, TransactionsAdapter.V
         this.priceFormatter = priceFormatter;
     }
 
+    @NotNull
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -49,10 +52,10 @@ class TransactionsAdapter extends ListAdapter<Transaction, TransactionsAdapter.V
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         final Transaction transaction = getItem(position);
-//        holder.binding.amount1.setText(priceFormatter.format(transaction.amount()));
-//        final double fiatAmount = transaction.amount() * transaction.coin().price();
-//        holder.binding.amount2.setText(priceFormatter.format(transaction.coin().currencyCode(), fiatAmount));
-//        holder.binding.timestamp.setText(DateFormat.getDateFormat(inflater.getContext()).format(transaction.createdAt()));
+        holder.binding.amount1.setText(priceFormatter.format(transaction.amount()));
+        final double fiatAmount = transaction.amount() * transaction.coin().price();
+        holder.binding.amount2.setText(priceFormatter.format(transaction.coin().currencyCode(), fiatAmount));
+        holder.binding.timestamp.setText(DateFormat.getDateFormat(inflater.getContext()).format(transaction.createdAt()));
     }
 
     @Override

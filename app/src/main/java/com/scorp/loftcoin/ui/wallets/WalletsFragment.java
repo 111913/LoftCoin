@@ -25,6 +25,7 @@ import com.scorp.loftcoin.BaseComponent;
 import com.scorp.loftcoin.R;
 import com.scorp.loftcoin.data.Transaction;
 import com.scorp.loftcoin.databinding.FragmentWalletsBinding;
+import com.scorp.loftcoin.widget.RecyclerViews;
 
 import java.util.List;
 
@@ -75,6 +76,8 @@ public class WalletsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        setHasOptionsMenu(true);
+
         binding = FragmentWalletsBinding.bind(view);
         walletsSnapHelper = new PagerSnapHelper();
         walletsSnapHelper.attachToRecyclerView(binding.recycler);
@@ -85,37 +88,28 @@ public class WalletsFragment extends Fragment {
         final int padding = (int) (displayMetrics.widthPixels - value.getDimension(displayMetrics)) / 2;
         binding.recycler.setPadding(padding, 0, padding, 0);
         binding.recycler.setClipToPadding(false);
+        binding.recycler.setHasFixedSize(true);
 
-        binding.recycler.addOnScrollListener(new CarouselScroller());
         binding.recycler.setLayoutManager(new LinearLayoutManager(view.getContext(), RecyclerView.HORIZONTAL, false));
+        binding.recycler.addOnScrollListener(new CarouselScroller());
+
+        disposable.add(RecyclerViews
+                .onSnap(binding.recycler, walletsSnapHelper)
+                .subscribe(viewModel::changeWallet));
 
         binding.recycler.setAdapter(walletsAdapter);
 
-        disposable.add(viewModel.wallets().subscribe(list -> walletsAdapter.submitList(list)));
-        disposable.add(viewModel.wallets().map(wallets -> wallets.isEmpty()).subscribe((isEmpty) ->{
-            binding.walletCard.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
-            binding.recycler.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
-        }));
-
-        binding.transactions.setLayoutManager(new LinearLayoutManager(view.getContext()));
-        binding.transactions.setAdapter(transactionsAdapter);
-        binding.transactions.setHasFixedSize(true);
-
-        disposable.add(viewModel.transactions().subscribe(new Consumer<List<Transaction>>() {
-            @Override
-            public void accept(List<Transaction> list) throws Exception {
-                transactionsAdapter.submitList(list);
-            }
-        }));
-    }
-
-    @Override
-    public void onDestroyView() {
-        walletsSnapHelper.attachToRecyclerView(null);
-        binding.recycler.setAdapter(null);
-        binding.transactions.setAdapter(null);
-        disposable.clear();
-        super.onDestroyView();
+//        disposable.add(viewModel.wallets().subscribe(walletsAdapter::submitList));
+//        disposable.add(viewModel.wallets().map(List::isEmpty).subscribe((isEmpty) -> {
+//            binding.walletCard.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
+//            binding.recycler.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
+//        }));
+//
+//        binding.transactions.setLayoutManager(new LinearLayoutManager(view.getContext()));
+//        binding.transactions.setAdapter(transactionsAdapter);
+//        binding.transactions.setHasFixedSize(true);
+//
+//        disposable.add(viewModel.transactions().subscribe(transactionsAdapter::submitList));
     }
 
     @Override
@@ -131,6 +125,15 @@ public class WalletsFragment extends Fragment {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onDestroyView() {
+        walletsSnapHelper.attachToRecyclerView(null);
+        binding.recycler.setAdapter(null);
+        //binding.transactions.setAdapter(null);
+        disposable.clear();
+        super.onDestroyView();
     }
 
 
