@@ -36,9 +36,9 @@ public interface CoinsRepo {
                     .sortBy(SortBy.RANK);
         }
 
-        abstract String currency();
-        abstract boolean forceUpdate();
-        abstract SortBy sortBy();
+        public abstract String currency();
+        public abstract boolean forceUpdate();
+        public abstract SortBy sortBy();
 
         @AutoValue.Builder
         public abstract static class Builder{
