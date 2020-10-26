@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/dark_six">
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/v_top_guidline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="123dp"/>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/artboard_top"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/v_top_guidline"
+        tools:ignore="ContentDescription"/>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/v_bottom_guidline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="111dp"/>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/g_bottom_guidline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="423dp"/>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/artboard_bottom"
+        app:layout_constraintTop_toBottomOf="@+id/g_bottom_guidline"
+        app:layout_constraintStart_toEndOf="@+id/v_bottom_guidline"
+        tools:ignore="ContentDescription"/>
+
+    <View
+        android:id="@+id/outer_circle"
+        android:layout_width="160dp"
+        android:layout_height="160dp"
+        android:background="@drawable/circle_outer_splash"
+        android:alpha="0.2"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/title"
+        app:layout_constraintVertical_chainStyle="packed"/>
+
+    <View
+        android:id="@+id/inner_circle"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="28dp"
+        android:background="@drawable/circle_inner_splash"
+        app:layout_constraintTop_toTopOf="@id/outer_circle"
+        app:layout_constraintStart_toStartOf="@id/outer_circle"
+        app:layout_constraintEnd_toEndOf="@id/outer_circle"
+        app:layout_constraintBottom_toBottomOf="@id/outer_circle"/>
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/app_name"
+        android:textColor="@color/white"
+        android:textSize="48sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/outer_circle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_chainStyle="packed"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

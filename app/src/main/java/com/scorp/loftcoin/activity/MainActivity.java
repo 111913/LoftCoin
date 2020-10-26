@@ -1,8 +1,10 @@
-package com.scorp.loftcoin;
+package com.scorp.loftcoin.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+
+import com.scorp.loftcoin.R;
 
 public class MainActivity extends AppCompatActivity {
 
