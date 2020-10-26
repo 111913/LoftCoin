@@ -1,4 +1,4 @@
-package com.scorp.loftcoin.util;
+package com.scorp.loftcoin.widget;
 
 import android.graphics.Outline;
 import android.view.View;

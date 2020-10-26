@@ -23,7 +23,7 @@ public class PriceFormatter implements Formatter<Double> {
     private static final Map<String, Locale> LOCALES = new HashMap<>();
 
     static {
-        LOCALES.put("RUB", new Locale("ru", "RU"));
+        LOCALES.put("RUB", new Locale("RU", "RU"));
         LOCALES.put("EUR", Locale.GERMANY);
     }
 
