@@ -1,7 +1,6 @@
 package com.scorp.loftcoin.ui.rates;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -16,28 +15,34 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.scorp.loftcoin.BaseComponent;
 import com.scorp.loftcoin.R;
-import com.scorp.loftcoin.data.Coin;
 import com.scorp.loftcoin.databinding.FragmentRatesBinding;
-import com.scorp.loftcoin.util.PercentFormatter;
-import com.scorp.loftcoin.util.PriceFormatter;
 
-import java.util.List;
-
-import timber.log.Timber;
+import javax.inject.Inject;
 
 public class RatesFragment extends Fragment {
+
+    private final RatesComponent ratesComponent;
 
     private FragmentRatesBinding binding;
 
     private RatesAdapter adapter;
     private RatesViewModel viewModel;
 
+    @Inject
+    public RatesFragment(BaseComponent baseComponent) {
+        ratesComponent = DaggerRatesComponent.builder()
+                .baseComponent(baseComponent)
+                .build();
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        viewModel = new ViewModelProvider(this).get(RatesViewModel.class);
-        adapter = new RatesAdapter(new PriceFormatter(), new PercentFormatter());
+        viewModel = new ViewModelProvider(this, ratesComponent.viewModelFactory()).get(RatesViewModel.class);
+
+        adapter = ratesComponent.ratesAdapter();
     }
 
     @Nullable
@@ -50,13 +55,16 @@ public class RatesFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setHasOptionsMenu(true);
+
         binding = FragmentRatesBinding.bind(view);
         binding.recyclerRates.setLayoutManager(new LinearLayoutManager(view.getContext()));
-        binding.recyclerRates.swapAdapter(adapter, false);
+        binding.recyclerRates.setAdapter(adapter);
         binding.recyclerRates.setHasFixedSize(true);
 
         viewModel.coins().observe(getViewLifecycleOwner(), (coins) -> adapter.submitList(coins));
         viewModel.isRefreshing().observe(getViewLifecycleOwner(), (refreshing) -> binding.refresher.setRefreshing(refreshing));
+
+        binding.refresher.setOnRefreshListener(viewModel::refresh);
     }
 
     @Override
@@ -72,12 +80,16 @@ public class RatesFragment extends Fragment {
                 .navigate(R.id.currency_dialog);
             return true;
         }
+        else if(R.id.sort == item.getItemId()){
+            viewModel.switchSortingOrder();
+            return true;
+        }
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     public void onDestroyView() {
-        binding.recyclerRates.swapAdapter(null, false);
+        binding.recyclerRates.setAdapter(null);
         super.onDestroyView();
     }
 }

@@ -21,9 +21,16 @@ import android.view.ViewGroup;
 import com.scorp.loftcoin.R;
 import com.scorp.loftcoin.databinding.FragmentWalletsBinding;
 
+import javax.inject.Inject;
+
 
 public class WalletsFragment extends Fragment {
+
     private SnapHelper walletsSnapHelper;
+
+    @Inject
+    public WalletsFragment() {
+    }
 
     @Nullable
     @Override
@@ -46,11 +53,11 @@ public class WalletsFragment extends Fragment {
         binding.recycler.setClipToPadding(false);
 
         binding.recycler.addOnScrollListener(new CarouselScroller());
-
         binding.recycler.setLayoutManager(new LinearLayoutManager(view.getContext(), RecyclerView.HORIZONTAL, false));
-        binding.recycler.setAdapter(new WalletsAdapter());
-        binding.recycler.setVisibility(View.VISIBLE);
-        binding.walletCard.setVisibility(View.GONE);
+
+//        binding.recycler.setAdapter(new WalletsAdapter());
+//        binding.recycler.setVisibility(View.VISIBLE);
+//        binding.walletCard.setVisibility(View.GONE);
     }
 
     @Override
